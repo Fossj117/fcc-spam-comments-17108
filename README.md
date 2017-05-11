@@ -1,3 +1,5 @@
+[A small write-up here.](https://medium.com/@nhf/whats-up-with-all-of-those-identical-comments-on-the-fcc-net-neutrality-docket-105835f59c3e)
+
 # What is this repo?
 
 Lately, there has been controversy surrounding the FCC's net neutrality actions. The FCC has opened up a docket for public comment: 17-108, "Restoring Internet Freedom". Many astute journalists and observers have noticed a ton of identical comments being filed through the FCC's comment system. These comments all contain the exact same phrasing:
