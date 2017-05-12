@@ -59,6 +59,11 @@ filings = [ record for record in filings if hash(record['text_data']) in keep_ha
 # Also remove the couple of filings which have more than one filer
 filings = [ record for record in filings if len(record['filers']) == 1 ]
 
+# Load zip codes for geocoding
+with open('zipcodes.csv') as f:       
+    r = csv.reader(f)   
+    zips = {row[0]: (float(row[1]), float(row[2])) for row in list(zips)[1:]}
+
 # Now let's create a giant spreadsheet of these...
 export = []
 for record in filings:
@@ -83,13 +88,38 @@ for record in filings:
     
     # Date fields
     date_fields = ('date_disseminated', 'date_received', 'date_submission')
-    for field in date_received:
+    for field in date_fields:
         keep[field] = record.get(field).replace("Z","")
     
     # Other fields
     fields = ('confirmation_number', 'contact_email', 'id_submission')
     for field in fields:
-        keep[field] = record.get(unicode(field))
+        keep[field] = "_%s" % record.get(field)
+    
+    # Geocoding
+    zipcode = record['addressentity'].get('zip_code')
+
+    if zipcode:
+        # Never store zipcodes as integers, folks
+        if len(zipcode) == 4:
+            zipcode = '0%s' % zipcode
+            keep['zip_code'] = zipcode
+            
+        elif len(zipcode) == 3:
+            zipcode = '00%s' % zipcode        
+            keep['zip_code'] = zipcode
+            
+        
+        if zipcode in zips:
+            lat, lng = zips.get( zipcode )
+        else:
+            lat, lng = 0,0    
+    else:
+        lat, lng = 0, 0
+
+    keep['zip_lat'] = lat
+    keep['zip_lng'] = lng
+    keep['zip_code'] = zipcode
     
     export.append(keep)
 
@@ -100,7 +130,7 @@ header = ['id_submission', 'confirmation_number',
          'contact_email',
          u'address_line_1', u'address_line_2', 
          u'city', u'state', u'zip_code', u'zip4', 
-         'internationaladdress']
+         'internationaladdress', 'zip_lat', 'zip_lng']
          
 with open("fcc-filings-17-108-spam.csv", "w+") as f:
     writer = csv.DictWriter(f, fieldnames=header)
